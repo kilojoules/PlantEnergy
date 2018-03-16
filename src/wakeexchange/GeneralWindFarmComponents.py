@@ -9,7 +9,6 @@ from scipy.io import loadmat
 from scipy.spatial import ConvexHull
 from scipy.interpolate import UnivariateSpline
 
-import matplotlib.pylab as plt
 
 def add_gen_params_IdepVarComps(openmdao_group, datasize):
     openmdao_group.add('gp0', IndepVarComp('gen_params:pP', 1.88, pass_by_obj=True), promotes=['*'])
@@ -604,7 +603,7 @@ class SpacingComp(Component):
                        desc='y coordinates of turbines in wind dir. ref. frame')
 
         # Explicitly size output array
-        self.add_output('wtSeparationSquared', val=np.zeros(((nTurbines-1)*nTurbines/2.)),
+        self.add_output('wtSeparationSquared', val=np.zeros(int((nTurbines-1)*nTurbines/2.)),
                         desc='spacing of all turbines in the wind farm')
 
     def solve_nonlinear(self, params, unknowns, resids):
