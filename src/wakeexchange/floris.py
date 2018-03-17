@@ -243,6 +243,7 @@ class FLORISParameters(Component):
         for p in params:
             name = re.search('(?<=:)(.*)$', p).group(0)
             self.unknowns['floris_params:'+name] = params['model_params:'+name]
+            print('floris ', 'loris_params:'+name, params['model_params:'+name])
 
 
 class floris_wrapper(Group):
@@ -262,11 +263,12 @@ class floris_wrapper(Group):
 
         self.add('floris_model', Floris(nTurbines, direction_id, wake_model_options['differentiable'],
                                         wake_model_options['use_rotor_components'], wake_model_options['nSamples']),
-                 promotes=['turbineXw', 'turbineYw', 'yaw%i' % direction_id, 'hubHeight',
-                           'rotorDiameter', 'Ct', 'wind_speed', 'axialInduction', 'wtVelocity%i' % direction_id,
-                           'floris_params*'] if nSamples == 0 else ['turbineXw', 'turbineYw', 'yaw%i' % direction_id, 'hubHeight',
-                           'rotorDiameter', 'Ct', 'wind_speed', 'axialInduction', 'wtVelocity%i' % direction_id,
-                           'floris_params*', 'wsPositionXw', 'wsPositionYw', 'wsPositionZ', 'wsArray%i' % direction_id])
+                 promotes=['*'])
+                 #promotes=['turbineXw', 'turbineYw', 'yaw%i' % direction_id, 'hubHeight',
+                 #          'rotorDiameter', 'Ct', 'wind_speed', 'axialInduction', 'wtVelocity%i' % direction_id,
+                 #          'floris_params*'] if nSamples == 0 else ['turbineXw', 'turbineYw', 'yaw%i' % direction_id, 'hubHeight',
+                 #          'rotorDiameter', 'Ct', 'wind_speed', 'axialInduction', 'wtVelocity%i' % direction_id,
+                 #          'floris_params*', 'wsPositionXw', 'wsPositionYw', 'wsPositionZ', 'wsArray%i' % direction_id])
 
 
 # Testing code for development only

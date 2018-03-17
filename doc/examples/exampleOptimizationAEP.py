@@ -1,12 +1,12 @@
 from __future__ import print_function
 
-from openmdao.api import Problem, pyOptSparseDriver
+from openmdao.api import Problem, ScipyOptimizer
 from wakeexchange.OptimizationGroups import OptAEP
 from wakeexchange import config
 
 import time
 import numpy as np
-import pylab as plt
+#import pylab as plt
 
 import cProfile
 
@@ -87,15 +87,16 @@ if __name__ == "__main__":
                                           minSpacing=minSpacing, differentiable=True, use_rotor_components=False))
 
     # set up optimizer
-    prob.driver = pyOptSparseDriver()
-    prob.driver.options['optimizer'] = 'SNOPT'
-    prob.driver.add_objective('obj', scaler=1E-5)
+    prob.driver = ScipyOptimizer()
+    #prob.driver.options['optimizer'] = 'SNOPT'
+    prob.driver.add_objective('AEP', scaler=1E-5)
+    #prob.driver.add_objective('obj', scaler=1E-5)
 
     # set optimizer options
-    prob.driver.opt_settings['Verify level'] = 3
-    prob.driver.opt_settings['Print file'] = 'SNOPT_print_exampleOptAEP.out'
-    prob.driver.opt_settings['Summary file'] = 'SNOPT_summary_exampleOptAEP.out'
-    prob.driver.opt_settings['Major iterations limit'] = 1000
+    #prob.driver.opt_settings['Verify level'] = 3
+    #prob.driver.opt_settings['Print file'] = 'SNOPT_print_exampleOptAEP.out'
+    #prob.driver.opt_settings['Summary file'] = 'SNOPT_summary_exampleOptAEP.out'
+    #prob.driver.opt_settings['Major iterations limit'] = 1000
 
     # select design variables
     #prob.driver.add_desvar('turbineX', lower=np.ones(nTurbs)*min(turbineX), upper=np.ones(nTurbs)*max(turbineX), scaler=1)

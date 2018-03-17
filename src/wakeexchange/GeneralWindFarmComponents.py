@@ -9,7 +9,7 @@ from scipy.io import loadmat
 from scipy.spatial import ConvexHull
 from scipy.interpolate import UnivariateSpline
 
-import matplotlib.pylab as plt
+#import matplotlib.pylab as plt
 
 def add_gen_params_IdepVarComps(openmdao_group, datasize):
     openmdao_group.add('gp0', IndepVarComp('gen_params:pP', 1.88, pass_by_obj=True), promotes=['*'])
@@ -105,6 +105,7 @@ class WindFrame(Component):
             unknowns['wsPositionYw'] = velX*np.sin(-windDirectionRad)+velY*np.cos(-windDirectionRad)
 
     def linearize(self, params, unknowns, resids):
+        print("PROBE_WindFrame")
 
         # obtain necessary inputs
         nTurbines = self.nTurbines
@@ -132,6 +133,7 @@ class WindFrame(Component):
         J[('turbineXw', 'turbineY')] = dturbineXw_dturbineY
         J[('turbineYw', 'turbineX')] = dturbineYw_dturbineX
         J[('turbineYw', 'turbineY')] = dturbineYw_dturbineY
+        print("PROBE_WindFrame_f")
 
         return J
 
@@ -206,6 +208,7 @@ class AdjustCtCpYaw(Component):
             unknowns['Cp_out'] = Cp
 
     def linearize(self, params, unknowns, resids):
+        print("PROBE_AdjustCtCpYaw")
 
         direction_id = self.direction_id
 
@@ -244,6 +247,7 @@ class AdjustCtCpYaw(Component):
             J[('Cp_out', 'Ct_in')] = np.zeros((nTurbines, nTurbines))
             J[('Cp_out', 'yaw%i' % direction_id)] = np.zeros((nTurbines, nTurbines))
 
+        print("PROBE_AdjustCtCpYaw_f")
         return J
 
 
@@ -306,6 +310,7 @@ class WindFarmAEP(Component):
             config.obj_func_calls_array[rank] += 1
 
     def linearize(self, params, unknowns, resids):
+        print("PROBE_WindFarmAEP")
 
         # # print('entering AEP - provideJ')
         AEP_method = params['gen_params:AEP_method']
@@ -329,6 +334,7 @@ class WindFarmAEP(Component):
             raise ValueError('AEP_method must be one of ["none","log","inverse"]')
 
 
+        print(unknowns["AEP"])
         # initialize Jacobian dict
         J = {}
 
@@ -341,6 +347,8 @@ class WindFarmAEP(Component):
             rank = comm.rank
             config.sens_func_calls_array[rank] += 1
             # print(np.sum(config.sens_func_calls_array))
+        print(J)
+        print("PROBE_WindFarmAEP_f")
 
         return J
 
@@ -577,6 +585,7 @@ class SpacingComp(Component):
         unknowns['wtSeparationSquared'] = separation_squared
 
     def linearize(self, params, unknowns, resids):
+        print("PROBE_SpacingComp")
 
         # obtain necessary inputs
         turbineX = params['turbineX']
@@ -611,6 +620,7 @@ class SpacingComp(Component):
         # populate Jacobian dict
         J['wtSeparationSquared', 'turbineX'] = dS[:, :nTurbines]
         J['wtSeparationSquared', 'turbineY'] = dS[:, nTurbines:]
+        print("PROBE_SpacingComp_f")
 
         return J
 
@@ -684,6 +694,7 @@ class BoundaryComp(Component):
                         %(type))
 
     def linearize(self, params, unknowns, resids):
+        print("PROBE_BoundaryComp")
 
         if self.type == 'polygon':
             unit_normals = params['boundaryNormals']
@@ -731,6 +742,7 @@ class BoundaryComp(Component):
         # return Jacobian dict
         J['boundaryDistances', 'turbineX'] = dfaceDistance_dx
         J['boundaryDistances', 'turbineY'] = dfaceDistance_dy
+        print("PROBE_BoundaryComp_f")
 
         return J
 
@@ -771,6 +783,7 @@ class MUX(Component):
             exec("unknowns['Array'][%i] = params['input%i']" % (i, i))
 
     def linearize(self, params, unknowns, resids):
+        print("PROBE_MUX")
 
         # initialize gradient calculation array
         dArray_dInput = np.zeros(self.nElements)
@@ -784,6 +797,7 @@ class MUX(Component):
             J['Array', 'input%i' % i] = np.array(dArray_dInput)
             dArray_dInput[i] = 0.0
 
+        print("PROBE_MUX_f")
         return J
 
 
@@ -823,6 +837,7 @@ class DeMUX(Component):
             exec("unknowns['output%i'] = params['Array'][%i]" % (i, i))
 
     def linearize(self, params, unknowns, resids):
+        print("PROBE_DeMUX")
 
         # initialize gradient calculation array
         doutput_dArray = np.eye(self.nElements)
@@ -834,6 +849,7 @@ class DeMUX(Component):
         for i in range(0, self.nElements):
             J['output%i' % i, 'Array'] = np.reshape(doutput_dArray[i, :], (1, self.nElements))
 
+        print("PROBE_DeMUX_f")
         return J
 
 
@@ -889,6 +905,7 @@ class CPCT_Interpolate_Gradients(Component):
         self.unknowns['Ct_out'] = self.unknowns['Ct_out'] * np.cos(self.params['yaw%i' % direction_id]*np.pi/180.0)**2
 
     def linearize(self, params, unknowns, resids):  # standard central differencing
+        print("PROBE_CPCT_Interpolate_Gradients")
         # set step size for finite differencing
         h = 1e-6
         direction_id = self.direction_id
@@ -943,6 +960,7 @@ class CPCT_Interpolate_Gradients(Component):
         J['Cp_out', 'wtVelocity%i' % direction_id] = dCP_dwind
         J['Ct_out', 'yaw%i' % direction_id] = dCT_dyaw
         J['Ct_out', 'wtVelocity%i' % direction_id] = dCT_dwind
+        print("PROBE_CPCT_Interpolate_Gradients_f")
 
         return J
 
@@ -1031,6 +1049,7 @@ class CPCT_Interpolate_Gradients_Smooth(Component):
         self.unknowns['Ct_out'] = Ct_out
 
     def linearize(self, params, unknowns, resids):  # standard central differencing
+        print("PROBE_CPCT_Interpolate_Gradients_Smooth")
 
         # obtain necessary inputs
         direction_id = self.direction_id
@@ -1042,6 +1061,7 @@ class CPCT_Interpolate_Gradients_Smooth(Component):
         J['Ct_out', 'yaw%i' % direction_id] = np.eye(self.nTurbines)*self.dCt_out_dyaw
         J['Ct_out', 'wtVelocity%i' % direction_id] = np.eye(self.nTurbines)*self.dCt_out_dvel
 
+        print("PROBE_CPCT_Interpolate_Gradients_Smooth_f")
         return J
 
 
@@ -1175,6 +1195,7 @@ class WindDirectionPower(Component):
         # print(wtPower)
 
     def linearize(self, params, unknowns, resids):
+        print("PROBE_WindDirectionPower")
 
         # obtain necessary inputs
         direction_id = self.direction_id

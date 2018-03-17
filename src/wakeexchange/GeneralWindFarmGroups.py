@@ -7,7 +7,7 @@ if MPI:
     from openmdao.api import PetscKSP
 
 from wakeexchange.floris import floris_wrapper, add_floris_params_IndepVarComps
-from wakeexchange.gauss import add_gauss_params_IndepVarComps
+#from wakeexchange.gauss import add_gauss_params_IndepVarComps
 
 
 
